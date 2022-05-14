@@ -6,6 +6,10 @@ import { ParsingHelpers } from './parsingHelpers.js';
 const app = express();
 dotenv.config();
 
+if (!process.env.PORT || !process.env.YOUTUBE_API_KEY) {
+    throw new Error('ERROR: PORT or YOUTUBE_API_KEY environment variable has not been correctly set!');
+}
+
 app.get('/api/opportunityCost/:videoUrl', (req, res) => {
     res.type('application/json'); 
 
