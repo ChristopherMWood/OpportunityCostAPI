@@ -15,9 +15,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: executing remote ssh commands to deploy on remote host
-      uses: garygrossgarten/github-action-ssh@release
+      uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USERNAME }}
-        privateKey: ${{ secrets.SSH_KEY }}
-        command: whoami
+        key: ${{ secrets.SSH_KEY }}
+        port: ${{ secrets.SSH_PORT }}
+        script: |
+          ${{ secrets.DEPLOY_SCRIPT }}
