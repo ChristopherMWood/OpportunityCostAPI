@@ -21,6 +21,7 @@ app.get('/api/opportunityCost/:videoUrl', (req, res) => {
         let opportunityCost = ParsingHelpers.getTimeFromTotalSeconds(totalSeconds * data.views);
 
         res.send(JSON.stringify({
+            test: 'placeholder',
             views: data.views,
             time: opportunityCost
         }));
