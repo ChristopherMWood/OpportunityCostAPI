@@ -20,4 +20,4 @@ jobs:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USERNAME }}
         privateKey: ${{ secrets.SSH_KEY }}
-        command: ${{ secrets.DEPLOY_SCRIPT }}
+        command: ls -la
