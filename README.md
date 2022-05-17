@@ -26,10 +26,14 @@ GOOGLE_API_KEY={Google API key here}
     views: total views for the video,
     totalSeconds: total seconds watched by all people,
     formattedTime: {
+        centuries:,
+        decades:,
+        years:,
+        months:,
+        days:
+        hours:
         seconds:,
-        minutes:,
-        hours:,
-        days:,
+        minutes:
     }
 }
 ```
