@@ -5,16 +5,12 @@ class ParsingHelpers {
         let time = td.parse(videoDuration);
         let totalSeconds = 0;
     
-        if (time.years) {
-            totalSeconds += time.years * 31536000;
-        }
-    
-        if (time.months) {
-            totalSeconds += time.months * 2592000;
-        }
-    
         if (time.days) {
             totalSeconds += time.months * 86400;
+        }
+
+        if (time.hours) {
+            totalSeconds += time.hours * 3600;
         }
         
         if (time.minutes) {
@@ -30,6 +26,12 @@ class ParsingHelpers {
     
     static getTimeFromTotalSeconds(seconds) {
         let time = {};
+
+        time.centuries = Math.floor(seconds / 3155760000);
+        seconds -= time.centuries * 3155760000;
+
+        time.decades = Math.floor(seconds / 315576000);
+        seconds -= time.decades * 315576000;
     
         time.years = Math.floor(seconds / 31536000);
         seconds -= time.years * 31536000;

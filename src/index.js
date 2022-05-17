@@ -10,23 +10,27 @@ if (!process.env.PORT || !process.env.GOOGLE_API_KEY) {
     throw new Error('ERROR: PORT or GOOGLE_API_KEY environment variable has not been correctly set!');
 }
 
-app.get('/api/opportunityCost/:videoUrl', (req, res) => {
+app.get('/api/opportunityCost/:youtubeVideoId', (req, res) => {
     res.type('application/json'); 
 
-    let videoUrl = req.params.videoUrl;
-    let videoId = ParsingHelpers.getVideoIdFromUrl(videoUrl);
+    let videoId = req.params.youtubeVideoId;
 
     YoutubeApiProxy.getMetadata(videoId, process.env.GOOGLE_API_KEY, function(data) {
-        let totalSeconds = ParsingHelpers.getSecondsFromVideoDuration(data.videoDuration);
-        let opportunityCost = ParsingHelpers.getTimeFromTotalSeconds(totalSeconds * data.views);
+        const videoSeconds = ParsingHelpers.getSecondsFromVideoDuration(data.videoDuration);
+        const totalSecondsOfViews = data.views * videoSeconds;
 
+        res.status(200);
         res.send(JSON.stringify({
-            test: 'placeholder',
             views: data.views,
-            time: opportunityCost
+            totalSeconds: totalSecondsOfViews,
+            formattedTime: ParsingHelpers.getTimeFromTotalSeconds(totalSecondsOfViews)
         }));
     }, function(error) {
         console.log(error);
+        res.status(400);
+        res.send(JSON.stringify({
+            message: 'An unknown error occured loading the data'
+        }));
     });
 });
 

@@ -17,12 +17,19 @@ GOOGLE_API_KEY={Google API key here}
 ## API Endpoint(s)
 ### **GET** - YouTube Video Opportunity Cost 
 
-**Request URL:** {base_url}/api/opportunityCost/{YouTube URL}
+**Request URL:** {base_url}/api/opportunityCost/{YouTube Video ID}
 ```**Note:** YouTube URL parameter must be URL encoded```
 
 **Response**
 ```
 {
-    // To be updated once finalized
+    views: total views for the video,
+    totalSeconds: total seconds watched by all people,
+    formattedTime: {
+        seconds:,
+        minutes:,
+        hours:,
+        days:,
+    }
 }
 ```
