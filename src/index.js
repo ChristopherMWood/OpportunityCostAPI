@@ -1,6 +1,7 @@
 import express from 'express';
+import fs from 'fs';
+import https from "https";
 import cors from 'cors';
-
 import dotenv from 'dotenv';
 import { YoutubeApiProxy } from './youtubeApiProxy.js';
 import { ParsingHelpers } from './parsingHelpers.js';
@@ -44,6 +45,17 @@ app.get('/api/opportunityCost/:youtubeVideoId', (req, res) => {
     });
 });
 
-app.listen(process.env.PORT, () => {
+let server = app;
+
+if (process.env.NODE_ENV !== 'development') {
+    server = https.createServer({
+      key: fs.readFileSync("../../server.key"),
+      cert: fs.readFileSync("../../server.cert"),
+    },
+    app
+  );
+}
+
+server.listen(process.env.PORT, () => {
     console.log(`Server running on port ${process.env.PORT}`);
 });
