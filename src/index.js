@@ -1,6 +1,4 @@
 import express from 'express';
-import fs from 'fs';
-import https from "https";
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
@@ -27,19 +25,10 @@ app.use(cors());
 app.use('/api', apiRoutes);
 
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../build/index.html'));
+    res.sendFile(path.join(__dirname, '../../static_files/index.html'));
 });
 
 let server = app;
-
-// if (process.env.NODE_ENV !== 'development') {
-//     server = https.createServer({
-//       key: fs.readFileSync("server.key"),
-//       cert: fs.readFileSync("server.cert"),
-//     },
-//     app
-//   );
-// }
 
 server.listen(process.env.PORT, () => {
     console.log(`Server running on port ${process.env.PORT}`);
