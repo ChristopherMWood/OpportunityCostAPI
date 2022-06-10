@@ -1,4 +1,4 @@
-import { ParsingHelpers } from '../src/parsingHelpers.js';
+import { ParsingHelpers } from '../src//api/opportunityCostApi/parsingHelpers';
 
 test('Seconds are correctly parsed to time object', () => {
   const time = ParsingHelpers.getTimeFromTotalSeconds(30);
