@@ -1,6 +1,3 @@
-# OpportunityCost API
-Backend API for https://www.opportunitycost.life that takes a YouTube video URL and calculates how much time has been spent by all viewers combined to watch that video. Started as a joke and turned into this in the end.
-
 ## Project Setup
 1. Install Node.js
 2. Run ```npm install```
@@ -10,11 +7,13 @@ PORT={port # here}
 GOOGLE_API_KEY={Google API key here}
 ```
 
-## Commands
+### Available Commands
 - To start Server: ```npm start```
 - To run all tests: ```npm test```
 
 ## API Endpoint(s)
+Backend API for https://www.opportunitycost.life that takes a YouTube video URL and calculates how much time has been spent by all viewers combined to watch that video. Started as a joke and turned into this in the end.
+
 ### **GET** - YouTube Video Opportunity Cost 
 
 **Request URL:** {base_url}/api/opportunityCost/{YouTube Video ID}
