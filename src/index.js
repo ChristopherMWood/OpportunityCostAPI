@@ -17,7 +17,14 @@ const __dirname = path.dirname(__filename);
 const app = express();
 app.use(express.static(path.join(__dirname, '../../static_files')));
 app.use(cors());
-app.use('/api', apiRoutes);
+
+const apiRouteRequestLogging = (req, res, next) => {
+    const requestedEndpoint = req.protocol + '://' + req.get('Host') + req.url;
+    logger.info(`API Request: ${requestedEndpoint}`);
+    next();
+};
+
+app.use('/api', apiRouteRequestLogging, apiRoutes);
 
 /* Global Error Handler */
 app.use((err, req, res, next) => {
@@ -27,6 +34,8 @@ app.use((err, req, res, next) => {
 
 /* Static File Server for frontend */
 app.get('*', (req, res) => {
+    const requestedEndpoint = req.protocol + '://' + req.get('Host') + req.url;
+    logger.info(`STATIC File Request: ${requestedEndpoint}`);
     res.sendFile(path.join(__dirname, '../../static_files/index.html'));
 });
 
