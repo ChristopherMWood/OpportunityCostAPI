@@ -6,6 +6,7 @@
   "main": "./dist/index.js",
   "scripts": {
     "start": "node ./src/index.js",
+    "debug": "node ./src/index.js --inspect",
     "test": "jest"
   },
   "jest": {
@@ -29,14 +30,13 @@
     "cors": "^2.8.5",
     "dotenv": "^16.0.1",
     "express": "^4.18.1",
-    "express-winston": "^4.2.0",
-    "jest": "^28.1.0",
-    "node-redis": "^0.1.7",
+    "express-redis-cache": "^1.1.3",
+    "jest": "^28.1.3",
     "tinyduration": "^3.2.2",
-    "winston": "^3.7.2"
+    "winston": "^3.8.1"
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.17.10",
-    "babel-jest": "^28.1.0"
+    "@babel/preset-env": "^7.18.6",
+    "babel-jest": "^28.1.3"
   }
 }
