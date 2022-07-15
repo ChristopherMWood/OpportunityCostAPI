@@ -1,14 +1,17 @@
 ## Project Setup
 1. Install Node.js
+2. (optional) Install Redis and run in background when NODE_ENV = production
 2. Run ```npm install```
-3. Create ```.env``` file with the following environment variables
+4. Create ```.env``` file with the following environment variables
 ```
+NODE_ENV=development  #make production for request caching
 PORT={port # here}
 GOOGLE_API_KEY={Google API key here}
 ```
 
 ### Available Commands
 - To start Server: ```npm start```
+- To debug Server: ```npm run-script debug```
 - To run all tests: ```npm test```
 
 ## API Endpoint(s)

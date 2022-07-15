@@ -1,5 +1,4 @@
 import express from 'express';
-import logger from '../../logger.js'
 import { YoutubeApiProxy } from './youtubeApiProxy.js';
 import { ParsingHelpers } from './parsingHelpers.js';
 
@@ -25,6 +24,13 @@ router.get('/:youtubeVideoId', (req, res) => {
             message: 'An unknown error occured loading the data'
         }));
     });
+});
+
+router.get('/top', (req, res) => {
+    res.status(200);
+    res.send(JSON.stringify({
+        message: 'Not implemented yet'
+    }));
 });
 
 export default router;
