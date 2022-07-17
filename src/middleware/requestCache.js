@@ -1,15 +1,15 @@
 import ExpressRedisCache from 'express-redis-cache'
 
-let cacheRoute
+let requestCache
 
 if (process.env.NODE_ENV === 'production') {
 	const cache = ExpressRedisCache({
 		expire: 60 * 10,
 	})
 
-	cacheRoute = cache.route()
+	requestCache = cache.route()
 } else {
-	cacheRoute = (req, res, next) => { next() }
+	requestCache = (req, res, next) => { next() }
 }
 
-export default cacheRoute
+export default requestCache
