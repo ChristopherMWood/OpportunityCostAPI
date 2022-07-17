@@ -1,5 +1,6 @@
 import express from 'express'
 import bodyParser from 'body-parser'
+import responseTime from 'response-time'
 import cors from 'cors'
 import dotenv from 'dotenv'
 import apiRoutes from './api/routes.js'
@@ -10,12 +11,16 @@ dotenv.config()
 logger.info(`Runtime Environment: ${process.env.NODE_ENV}`)
 
 if (!process.env.GOOGLE_API_KEY) {
-	throw new Error('ERROR: PORT or GOOGLE_API_KEY environment variable has not been correctly set!')
+	throw new Error('ERROR: GOOGLE_API_KEY environment variable has not been correctly set!')
 }
 
 const app = express()
 app.use(cors())
 app.use(bodyParser.json())
+
+app.use(responseTime(function (req, res, time) {
+	logger.info(`[PERFORMANCE - ${time}ms: ${req.method + req.url}`)
+  }))
 
 const apiRouteRequestLogging = (req, res, next) => {
 	const requestedEndpoint = req.protocol + '://' + req.get('Host') + req.url

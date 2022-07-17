@@ -21,6 +21,14 @@ docker image prune -f
 - To debug Server: ```npm run-script debug```
 - To run all tests: ```npm test```
 
+### Running Docker
+Environment (env) options: dev || prod
+
+- ```docker-compose -f docker-compose.<environment>.yml up```
+- ```docker-compose -f docker-compose.<environment.yml up --force-recreate --build -d```
+- ```docker-compose -f docker-compose.<environment>.yml down```
+
+
 ## API Endpoint(s)
 Backend API for https://www.opportunitycost.life that takes a YouTube video URL and calculates how much time has been spent by all viewers combined to watch that video. Started as a joke and turned into this in the end.
 

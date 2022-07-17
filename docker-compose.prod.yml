@@ -1,5 +1,5 @@
 version: '3'
-name: api_christopherwood_dev
+name: PRODUCTION_api_christopherwood_dev
 
 volumes:
   data:
@@ -8,20 +8,22 @@ services:
   nginx:
     container_name: nginx
     build:
-      dockerfile: ./docker/nginx/Dockerfile.nginx
+      dockerfile: ./docker/nginx/Dockerfile.prod.nginx
     image: nginx_proxy
     restart: always
     ports:
       - "80:80"
   api:
     build:
-      dockerfile: ./docker/node/Dockerfile.node
+      dockerfile: ./docker/node/Dockerfile.prod.node
     volumes:
     - ./src:/usr/src/app/src
     image: node_api
     restart: always
     expose:
       - "8080"
+    ports:
+      - 9229:9229
   redis:
     image: redis:7.0.3-alpine
     restart: always
@@ -29,12 +31,3 @@ services:
       - data:/data
     expose:
       - "6379"
-  # db:
-  #   image: mysql:8.0.29-debian
-  #   expose:
-  #   - "3306"
-  #   environment:
-  #     - MYSQL_ROOT_PASSWORD=password1
-  #     - MYSQL_USER=user
-  #     - MYSQL_PASSWORD=password2
-  #     - MYSQL_DATABASE=database
