@@ -1,26 +1,29 @@
 version: '3'
+name: api_christopherwood_dev
 
 volumes:
   data:
 
 services:
   nginx:
-    image: nginx
+    build:
+      dockerfile: ./docker/nginx/Dockerfile.nginx
     ports:
       - "80:80"
   node:
-    image: node
-    ports:
-      - "8080:8080"
-  db:
-    image: mysql
-    ports:
-      - "3306:3306"
-    environment:
-      - MYSQL_ROOT_PASSWORD=password1
-      - MYSQL_USER=user
-      - MYSQL_PASSWORD=password2
-      - MYSQL_DATABASE=database
+    build:
+      dockerfile: ./docker/node/Dockerfile.node
+    expose:                 # <--- the important bit here
+      - "8080"
+  # db:
+  #   image: mysql
+  #   ports:
+  #     - "3306:3306"
+  #   environment:
+  #     - MYSQL_ROOT_PASSWORD=password1
+  #     - MYSQL_USER=user
+  #     - MYSQL_PASSWORD=password2
+  #     - MYSQL_DATABASE=database
   redis:
     image: redis:latest
     volumes:

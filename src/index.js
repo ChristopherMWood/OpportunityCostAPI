@@ -7,9 +7,12 @@ import logger from './logger.js'
 
 dotenv.config()
 
-if (!process.env.PORT || !process.env.GOOGLE_API_KEY) {
+logger.info(`Runtime Environment: ${process.env.NODE_ENV}`)
+
+if (!process.env.GOOGLE_API_KEY) {
 	throw new Error('ERROR: PORT or GOOGLE_API_KEY environment variable has not been correctly set!')
 }
+
 const app = express()
 app.use(cors())
 app.use(bodyParser.json())
@@ -29,6 +32,8 @@ app.use((err, req, res, next) => {
 	next() //I think this is needed <-------check
 })
 
-app.listen(process.env.PORT, () => {
-	logger.info(`Server running on port ${process.env.PORT}...`)
+const port = 8080
+
+app.listen(port, () => {
+	logger.info(`Server running on port ${port}...`)
 })

@@ -1,16 +1,23 @@
 ## Project Setup
-1. Install Node.js
-2. (optional) Install Redis and run in background when NODE_ENV = production
-2. Run ```npm install```
-4. Create ```.env``` file with the following environment variables
+1. Install docker
+2. Create ```.env``` file with the following environment variables
 ```
 NODE_ENV=development  #make production for request caching
-PORT={port # here}
 GOOGLE_API_KEY={Google API key here}
 ```
+3. Run ```docker-compose up -d```
 
-### Available Commands
-- To start Server: ```npm start```
+### Docker Options
+- To watch all logs: ```docker-compose logs -f```
+- To watch specific image logs: ```docker-compose logs -f <image name>```
+- To Rebuild from scratch
+```
+docker-compose up --force-recreate --build -d
+docker image prune -f
+```
+
+### Available node Commands (outside of docker)
+- To run server: ```npm start```
 - To debug Server: ```npm run-script debug```
 - To run all tests: ```npm test```
 
