@@ -17,7 +17,7 @@ services:
     build:
       dockerfile: ./docker/node/Dockerfile.node
     volumes:
-    - ./src:/usr/src/app/api
+    - ./src:/usr/src/app/src
     image: node_api
     restart: always
     expose:
