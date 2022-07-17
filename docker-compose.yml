@@ -1,0 +1,29 @@
+version: '3'
+
+volumes:
+  data:
+
+services:
+  nginx:
+    image: nginx
+    ports:
+      - "80:80"
+  node:
+    image: node
+    ports:
+      - "8080:8080"
+  db:
+    image: mysql
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=password1
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=password2
+      - MYSQL_DATABASE=database
+  redis:
+    image: redis:latest
+    volumes:
+      - data:/data
+    ports:
+      - 6379:6379
