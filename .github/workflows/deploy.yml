@@ -24,4 +24,4 @@ jobs:
         script: |
           export NVM_DIR=~/.nvm
           source ~/.nvm/nvm.sh
-          ${{ secrets.DEPLOY_SCRIPT }}
+          # ${{ secrets.DEPLOY_SCRIPT }}
