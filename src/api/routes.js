@@ -5,7 +5,8 @@ import christopherWoodDevApiRoutes from './christopherwood.dev/routes.js'
 
 const router = express.Router()
 
-router.use('/opportunityCost', requestCache, opportunityCostApiRoutes)
+// router.use('/opportunityCost', requestCache, opportunityCostApiRoutes) //USE THIS FOR CACHING
+router.use('/opportunityCost', opportunityCostApiRoutes)
 router.use('/site', christopherWoodDevApiRoutes)
 
 router.get('*', (req, res) => {

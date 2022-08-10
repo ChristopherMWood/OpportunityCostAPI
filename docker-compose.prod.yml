@@ -5,14 +5,6 @@ volumes:
   data:
 
 services:
-  nginx:
-    container_name: nginx
-    build:
-      dockerfile: ./docker/nginx/Dockerfile.prod.nginx
-    image: nginx_proxy
-    restart: always
-    ports:
-      - "80:80"
   api:
     build:
       dockerfile: ./docker/node/Dockerfile.prod.node
@@ -20,10 +12,8 @@ services:
     - ./src:/usr/src/app/src
     image: node_api
     restart: always
-    expose:
-      - "8080"
     ports:
-      - 9229:9229
+      - 8080:8080
   redis:
     image: redis:7.0.3-alpine
     restart: always

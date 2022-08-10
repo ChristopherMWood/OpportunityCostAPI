@@ -2,9 +2,10 @@ FROM node:16.16-alpine
 
 WORKDIR /usr/src/app
 
+ENV NODE_ENV=development                                                                                                       
 COPY package*.json ./
 RUN npm install
 
 COPY . .
 
-CMD [ "npm", “run”, "start" ]
+CMD [ "npm", "start" ]

@@ -5,14 +5,6 @@ volumes:
   data:
 
 services:
-  nginx:
-    container_name: nginx
-    build:
-      dockerfile: ./docker/nginx/Dockerfile.dev.nginx
-    image: nginx_proxy
-    restart: always
-    ports:
-      - "80:80"
   api:
     build:
       dockerfile: ./docker/node/Dockerfile.dev.node
@@ -20,10 +12,10 @@ services:
     - ./src:/usr/src/app/src
     image: node_api
     restart: always
-    expose:
-      - "8080"
     ports:
-      - 9229:9229
+      - 8080:8080
+    env_file: 
+      - .env
   redis:
     image: redis:7.0.3-alpine
     restart: always
@@ -32,6 +24,7 @@ services:
     expose:
       - "6379"
   # db:
+  #   platform: linux/amd64
   #   image: mysql:8.0.29-debian
   #   expose:
   #   - "3306"
@@ -40,3 +33,5 @@ services:
   #     - MYSQL_USER=user
   #     - MYSQL_PASSWORD=password2
   #     - MYSQL_DATABASE=database
+  #   env_file: 
+  #     - .env

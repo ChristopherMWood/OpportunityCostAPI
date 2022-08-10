@@ -25,7 +25,7 @@ docker image prune -f
 Environment (env) options: dev || prod
 
 - ```docker-compose -f docker-compose.<environment>.yml up```
-- ```docker-compose -f docker-compose.<environment.yml up --force-recreate --build -d```
+- ```docker-compose -f docker-compose.<environment>.yml up --force-recreate --build -d```
 - ```docker-compose -f docker-compose.<environment>.yml down```
 
 
