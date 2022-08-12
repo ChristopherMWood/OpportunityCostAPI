@@ -9,21 +9,18 @@ import apiRoutes from './api/routes.js'
 import logger from './logger.js'
 import { MongoClient } from 'mongodb'
 
-//CHECK HOW TO MANAGE MONGO DB CONNECTIONS
+logger.info(`Server running in: ${process.env.NODE_ENV} mode`)
+
 const mongoConnectionString = `mongodb://${process.env.MONGO_ROOT_USERNAME}:${process.env.MONGO_ROOT_PASSWORD}@${process.env.MONGO_HOSTNAME}:${process.env.MONGO_PORT}/${process.env.MONGO_DATABASE}?authSource=admin`;
 const client = new MongoClient(mongoConnectionString);
 
-async function TESTMONGOCONNECTION() {
-  try {
-    await client.connect();
-    console.log("Connected successfully to MongoDB Server");
-  } finally {
-    await client.close();
-  }
+try {
+	await client.connect();
+	console.log("Connected successfully to MongoDB Server");
+} catch {
+	console.error("Error connecting to Mongo DB");
+	process.exit(0);
 }
-TESTMONGOCONNECTION().catch(console.dir);
-
-logger.info(`Runtime Environment: ${process.env.NODE_ENV}`)
 
 if (!process.env.GOOGLE_API_KEY) {
 	throw new Error('ERROR: GOOGLE_API_KEY environment variable has not been correctly set!')
@@ -52,8 +49,20 @@ app.use((err, req, res, next) => {
 	next() //I think this is needed <-------check
 })
 
-const port = 8080
-
-app.listen(port, () => {
-	logger.info(`Server running on port ${port}...`)
+app.locals.db = client.db();
+app.listen(process.env.SERVER_PORT, () => {
+	logger.info(`Server running on port ${process.env.SERVER_PORT}...`)
 })
+
+function handleExit(signal) {
+	logger.info(`Received ${signal}. Shutting down server.`)
+
+    client.close();
+	app.close(function () {
+		process.exit(0);
+	});
+}
+
+process.on('SIGINT', handleExit);
+process.on('SIGQUIT', handleExit);
+process.on('SIGTERM', handleExit);
