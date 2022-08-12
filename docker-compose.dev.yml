@@ -16,6 +16,8 @@ services:
       - 8080:8080
     env_file: 
       - .env
+    depends_on:
+      - "mongodb"
   redis:
     image: redis:7.0.3-alpine
     restart: always
@@ -23,17 +25,16 @@ services:
       - data:/data
     expose:
       - "6379"
-  db:
-    # platform: linux/amd64
-    image: arm64v8/mysql:oracle
+  mongodb:
+    image: mongo
     restart: always
-    ports:
-      - 3306:3306
     environment:
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - MYSQL_ALLOW_EMPTY_PASSWORD=no
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
-    env_file: 
+      - MONGO_INITDB_DATABASE=${MONGO_DATABASE}
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}
+    expose:
+      - "27017"
+    ports:
+      - "27017:27017"
+    env_file:
       - .env

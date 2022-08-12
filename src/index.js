@@ -1,12 +1,27 @@
+import dotenv from 'dotenv'
+dotenv.config()
+
 import express from 'express'
 import bodyParser from 'body-parser'
 import responseTime from 'response-time'
 import cors from 'cors'
-import dotenv from 'dotenv'
 import apiRoutes from './api/routes.js'
 import logger from './logger.js'
+import { MongoClient } from 'mongodb'
 
-dotenv.config()
+//CHECK HOW TO MANAGE MONGO DB CONNECTIONS
+const mongoConnectionString = `mongodb://${process.env.MONGO_ROOT_USERNAME}:${process.env.MONGO_ROOT_PASSWORD}@${process.env.MONGO_HOSTNAME}:${process.env.MONGO_PORT}/${process.env.MONGO_DATABASE}?authSource=admin`;
+const client = new MongoClient(mongoConnectionString);
+
+async function TESTMONGOCONNECTION() {
+  try {
+    await client.connect();
+    console.log("Connected successfully to MongoDB Server");
+  } finally {
+    await client.close();
+  }
+}
+TESTMONGOCONNECTION().catch(console.dir);
 
 logger.info(`Runtime Environment: ${process.env.NODE_ENV}`)
 
