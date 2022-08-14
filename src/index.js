@@ -7,24 +7,15 @@ import responseTime from 'response-time'
 import cors from 'cors'
 import apiRoutes from './api/routes.js'
 import logger from './logger.js'
-import { MongoClient } from 'mongodb'
+import mongo from './database.js';
 
 logger.info(`Server running in: ${process.env.NODE_ENV} mode`)
-
-const mongoConnectionString = `mongodb://${process.env.MONGO_ROOT_USERNAME}:${process.env.MONGO_ROOT_PASSWORD}@${process.env.MONGO_HOSTNAME}:${process.env.MONGO_PORT}/${process.env.MONGO_DATABASE}?authSource=admin`;
-const client = new MongoClient(mongoConnectionString);
-
-try {
-	await client.connect();
-	console.log("Connected successfully to MongoDB Server");
-} catch {
-	console.error("Error connecting to Mongo DB");
-	process.exit(0);
-}
 
 if (!process.env.GOOGLE_API_KEY) {
 	throw new Error('ERROR: GOOGLE_API_KEY environment variable has not been correctly set!')
 }
+
+await mongo.init();
 
 const app = express()
 app.use(cors())
@@ -49,7 +40,6 @@ app.use((err, req, res, next) => {
 	next() //I think this is needed <-------check
 })
 
-app.locals.db = client.db();
 app.listen(process.env.SERVER_PORT, () => {
 	logger.info(`Server running on port ${process.env.SERVER_PORT}...`)
 })
