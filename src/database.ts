@@ -1,11 +1,13 @@
-import { MongoClient } from 'mongodb'
-import logger from './logger.js';
+import { Db, MongoClient } from 'mongodb'
+import logger from './logger';
 
 const mongoConnectionString = `mongodb://${process.env.MONGO_ROOT_USERNAME}:${process.env.MONGO_ROOT_PASSWORD}@${process.env.MONGO_HOSTNAME}:${process.env.MONGO_PORT}/${process.env.MONGO_DATABASE}?authSource=admin`;
 
 class Database {
+  client: MongoClient;
+  db: Db | undefined;
+
   constructor() {
-    logger.error('DATABSE OBJECT MADE');
     this.client = new MongoClient(mongoConnectionString);
     this.client.on('close', () => { logger.info('Database disconnected'); });
     this.client.on('reconnect', () => { logger.info('Database reconnected'); });

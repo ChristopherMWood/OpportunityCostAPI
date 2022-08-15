@@ -1,14 +1,14 @@
-import mongo from "../../database.js";
-import logger from "../../logger.js";
+import mongo from "../../database";
+import logger from "../../logger";
 
 class VideoRepository {
 	static collectionName = "videos";
 
-	static async getVideoAsync(videoId) {
-		return await mongo.db.collection(VideoRepository.collectionName).findOne({ _id: videoId });
+	static async getVideoAsync(videoId: string) {
+		return await mongo.db?.collection(VideoRepository.collectionName).findOne({ _id: videoId });
 	}
 
-	static async upsertVideoAsync(data) {
+	static async upsertVideoAsync(data: any) {
 		const query = { videoId: data.videoMeta.id };
 		const update = {
 			$set: { 
@@ -27,11 +27,11 @@ class VideoRepository {
 			}
 		};
 
-		await mongo.db.collection(VideoRepository.collectionName).updateOne(query, update, { upsert: true });
+		await mongo.db?.collection(VideoRepository.collectionName).updateOne(query, update, { upsert: true });
 	}
 
-	static async getTopVideosByOpportunityCost(page, pageSize, success) {
-		mongo.db.collection(VideoRepository.collectionName).find().skip(page * pageSize).limit(pageSize).sort({ opportunityCost: -1 }).toArray((err, result) => {			
+	static async getTopVideosByOpportunityCost(page: number, pageSize: number, success: Function) {
+		mongo.db?.collection(VideoRepository.collectionName).find().skip(page * pageSize).limit(pageSize).sort({ opportunityCost: -1 }).toArray((err, result) => {			
 			if (err) {
 				logger.error(err);
 				throw err;
@@ -41,8 +41,8 @@ class VideoRepository {
 		  });
 	}
 
-	static async getTotalOpportunityCostForChannelVideos(channelId, success) {
-		return mongo.db.collection(VideoRepository.collectionName).aggregate([
+	static async getTotalOpportunityCostForChannelVideos(channelId: string, success: Function) {
+		return mongo.db?.collection(VideoRepository.collectionName).aggregate([
 			{$match:{ channelId: channelId }},
 			{ $group:{ _id: null, TotalSum: { $sum: "$opportunityCost" }} }
 		]).toArray((error, results) => {

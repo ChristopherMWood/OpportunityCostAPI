@@ -1,33 +1,35 @@
 import express from 'express'
-import { YoutubeApiProxy } from './youtubeApiProxy.js'
-import { ParsingHelpers } from './parsingHelpers.js'
-import ChannelRepository from '../services/channelRepository.js'
-import VideoRepository from '../services/videoRepository.js' 
-import logger from '../../logger.js'
-
+import { YoutubeApiProxy } from '../../domain/proxies/youtubeApiProxy'
+import { getSecondsFromISO8601 } from '../../domain/parsers/timeFormatParsers'
+import ChannelRepository from '../../domain/repositories/channelRepository'
+import VideoRepository from '../../domain/repositories/videoRepository' 
+import logger from '../../logger'
+ 
 const router = express.Router()
+const DEFAULT_PAGE = 0
+const DEFAULT_PAGE_SIZE = 20
 
 router.get('/top-channels', (req, res) => {
-	const pageParam = req.query.page;
-	const page = pageParam ? parseInt(pageParam) : 0;
+	const pageParam = req.query.page as string;
+	const page = pageParam ? parseInt(pageParam) : DEFAULT_PAGE;
 
-	const pageSizeParam = req.query.pageSize;
-	const pageSize = pageSizeParam ? parseInt(pageSizeParam) : 20;
+	const pageSizeParam = req.query.pageSize as string;
+	const pageSize = pageSizeParam ? parseInt(pageSizeParam) : DEFAULT_PAGE_SIZE;
 
-	ChannelRepository.getTopChannelsByOpportunityCost(page, pageSize, (results) => {
+	ChannelRepository.getTopChannelsByOpportunityCost(page, pageSize, (results: any) => {
 		res.status(200)
 		res.send(JSON.stringify(results))
 	});
 })
 
 router.get('/top-videos', (req, res) => {
-	const pageParam = req.query.page;
-	const page = pageParam ? parseInt(pageParam) : 0;
+	const pageParam = req.query.page as string;
+	const page = pageParam ? parseInt(pageParam) : DEFAULT_PAGE;
 
-	const pageSizeParam = req.query.pageSize;
-	const pageSize = pageSizeParam ? parseInt(pageSizeParam) : 20;
+	const pageSizeParam = req.query.pageSize as string;
+	const pageSize = pageSizeParam ? parseInt(pageSizeParam) : DEFAULT_PAGE_SIZE;
 
-	VideoRepository.getTopVideosByOpportunityCost(page, pageSize, (results) => {
+	VideoRepository.getTopVideosByOpportunityCost(page, pageSize, (results: any) => {
 		res.status(200)
 		res.send(JSON.stringify(results))
 	});
@@ -64,8 +66,9 @@ router.get('/:youtubeVideoId', async (req, res) => {
 
 	const videoId = req.params.youtubeVideoId
 
-	YoutubeApiProxy.getMetadata(videoId, process.env.GOOGLE_API_KEY, async (videoData) => {
-		const videoSeconds = ParsingHelpers.getSecondsFromVideoDuration(videoData.contentDetails.duration)
+	//TODO: FIX NULL COALLECING OPERATION HERE
+	YoutubeApiProxy.getVideoMetadataAsync(videoId, process.env.GOOGLE_API_KEY || '', async (videoData: any) => {
+		const videoSeconds = getSecondsFromISO8601(videoData.contentDetails.duration)
 		const totalOpportunityCost = videoData.statistics.viewCount * videoSeconds
 
 		const responseData = {
@@ -96,7 +99,7 @@ router.get('/:youtubeVideoId', async (req, res) => {
 
 		res.status(200)
 		res.send(JSON.stringify(responseData))
-	}, (error) => {
+	}, (error: Error) => {
 		res.status(400)
 		res.send(JSON.stringify({
 			message: 'An unknown error occured loading the data'

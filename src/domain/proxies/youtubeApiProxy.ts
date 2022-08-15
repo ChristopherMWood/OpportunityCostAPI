@@ -1,8 +1,8 @@
 import axios from 'axios'
-import logger from '../../logger.js'
+import logger from '../../logger'
 
 class YoutubeApiProxy {
-	static getMetadata(videoId, apiKey, success, failure) {
+	static getVideoMetadataAsync(videoId: string, apiKey: string, success: Function, failure: Function) {
 		const requestUrl = `https://www.googleapis.com/youtube/v3/videos?part=statistics,contentDetails,snippet&id=${videoId}&key=${apiKey}`
 
 		axios.get(requestUrl)
