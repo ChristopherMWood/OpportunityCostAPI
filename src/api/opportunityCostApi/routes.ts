@@ -1,9 +1,9 @@
 import express from 'express'
-import { YoutubeApiProxy } from '../../domain/proxies/youtubeApiProxy'
-import { getSecondsFromISO8601 } from '../../domain/parsers/timeFormatParsers'
-import ChannelRepository from '../../domain/repositories/channelRepository'
-import VideoRepository from '../../domain/repositories/videoRepository' 
-import logger from '../../logger'
+import { YoutubeApiProxy } from '../../domain/proxies/youtubeApiProxy.js'
+import { getSecondsFromISO8601 } from '../../domain/parsers/timeFormatParsers.js'
+import ChannelRepository from '../../domain/repositories/channelRepository.js'
+import VideoRepository from '../../domain/repositories/videoRepository.js' 
+import logger from '../../logger.js'
  
 const router = express.Router()
 const DEFAULT_PAGE = 0

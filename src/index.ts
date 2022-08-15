@@ -5,9 +5,9 @@ import express, { Express, NextFunction, Request, Response, Router } from 'expre
 import cors from 'cors'
 import bodyParser from 'body-parser'
 import responseTime from 'response-time'
-import apiRoutes from './api/routes'
-import mongo from './database';
-import logger from './logger'
+import apiRoutes from './api/routes.js'
+import mongo from './database.js';
+import logger from './logger.js'
 
 logger.info(`Server running in: ${process.env.NODE_ENV} mode`)
 

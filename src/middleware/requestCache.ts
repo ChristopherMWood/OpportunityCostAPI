@@ -1,5 +1,5 @@
 // import ExpressRedisCache from 'express-redis-cache'
-import logger from '../logger'
+import logger from '../logger.js'
 
 // const cache = ExpressRedisCache({
 // 	host: 'redis',

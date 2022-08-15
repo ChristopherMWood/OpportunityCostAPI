@@ -1,5 +1,5 @@
 import { Db, MongoClient } from 'mongodb'
-import logger from './logger';
+import logger from './logger.js';
 
 const mongoConnectionString = `mongodb://${process.env.MONGO_ROOT_USERNAME}:${process.env.MONGO_ROOT_PASSWORD}@${process.env.MONGO_HOSTNAME}:${process.env.MONGO_PORT}/${process.env.MONGO_DATABASE}?authSource=admin`;
 

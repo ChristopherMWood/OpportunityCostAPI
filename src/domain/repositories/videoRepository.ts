@@ -1,5 +1,5 @@
-import mongo from "../../database";
-import logger from "../../logger";
+import mongo from "../../database.js";
+import logger from "../../logger.js";
 
 class VideoRepository {
 	static collectionName = "videos";

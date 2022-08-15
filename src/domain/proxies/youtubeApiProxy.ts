@@ -1,5 +1,5 @@
 import axios from 'axios'
-import logger from '../../logger'
+import logger from '../../logger.js'
 
 class YoutubeApiProxy {
 	static getVideoMetadataAsync(videoId: string, apiKey: string, success: Function, failure: Function) {

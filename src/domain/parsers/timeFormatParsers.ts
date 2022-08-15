@@ -1,5 +1,5 @@
 import { parse } from 'tinyduration'
-import TimeConstants from '../constants/timeConstants';
+import TimeConstants from '../constants/timeConstants.js';
 
 const getSecondsFromISO8601 = (ISO8601Duration: string) => {
 	let totalSeconds = 0
