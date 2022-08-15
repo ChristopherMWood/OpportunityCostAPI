@@ -8,18 +8,23 @@ class ChannelRepository {
 		return await mongo.db.collection(ChannelRepository.collectionName).findOne({ _id: channelId });
 	}
 
-	static async upsertChannel(channelMeta) {
+	static async upsertChannel(data, opportunityCostIncrement = 0) {
 		return await mongo.db.collection(ChannelRepository.collectionName).updateOne({ 
-			_id: channelMeta.id 
+			_id: data.channelMeta.id 
 		}, {
 			$set: {
-				_id: channelMeta.id,
-				name: channelMeta.name,
+				_id: data.channelMeta.id,
+				name: data.channelMeta.name,
 				updatedOn: new Date(),
 			},
+			$addToSet: {
+				videos: data.videoMeta.id
+			},
+			$inc: {
+				opportunityCost: opportunityCostIncrement
+			},
 			$setOnInsert: {
-				createdOn: new Date(),
-				opportunityCost: 0
+				createdOn: new Date()
 			}
 		}, { 
 			upsert: true 

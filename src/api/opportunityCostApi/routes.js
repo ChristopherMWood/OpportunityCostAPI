@@ -36,12 +36,11 @@ router.get('/top-videos', (req, res) => {
 router.get('/channel/:channelId', async (req, res) => {
 	const channelId = req.params.channelId
 
-	const channel = await ChannelRepository.getChannelAsync(channelId);
-
-	if (channel) {
+	try {
+		const channel = await ChannelRepository.getChannelAsync(channelId);
 		res.status(200)
 		res.send(JSON.stringify(channel))
-	} else {
+	} catch (error) {
 		res.status(404)
 		res.send()
 	}
@@ -49,7 +48,6 @@ router.get('/channel/:channelId', async (req, res) => {
 
 router.get('/video/:videoId', async (req, res) => {
 	const videoId = req.params.videoId
-	
 	const video = await VideoRepository.getVideoAsync(videoId);
 
 	if (video) {
@@ -89,8 +87,12 @@ router.get('/:youtubeVideoId', async (req, res) => {
 			}
 		}
 
-		await ChannelRepository.upsertChannel(responseData.channelMeta)
-		await ChannelRepository.addOrUpdateVideoOnChannel(responseData.channelMeta.id, responseData.videoMeta)
+		//TEST & VERIFY CHANNEL OPPORTUNITY COST CALCULATION
+		const existingVideo = await VideoRepository.getVideoAsync(responseData.videoMeta.id);
+		const oppCostDiff = existingVideo ? responseData.videoMeta.opportunityCost - existingVideo.opportunityCost : responseData.videoMeta.opportunityCost;
+
+		await VideoRepository.upsertVideoAsync(responseData);
+		await ChannelRepository.upsertChannel(responseData, oppCostDiff)
 
 		res.status(200)
 		res.send(JSON.stringify(responseData))
