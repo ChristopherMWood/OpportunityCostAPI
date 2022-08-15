@@ -1,15 +1,16 @@
-import express from 'express'
+import express, { Request, Response } from 'express'
 import { YoutubeApiProxy } from '../../domain/proxies/youtubeApiProxy.js'
 import { getSecondsFromISO8601 } from '../../domain/parsers/timeFormatParsers.js'
 import ChannelRepository from '../../domain/repositories/channelRepository.js'
 import VideoRepository from '../../domain/repositories/videoRepository.js' 
+import { calculateCostDiff } from '../../domain/opportunityCostCalculations.js'
 import logger from '../../logger.js'
  
 const router = express.Router()
 const DEFAULT_PAGE = 0
 const DEFAULT_PAGE_SIZE = 20
 
-router.get('/top-channels', (req, res) => {
+router.get('/top-channels', (req: Request, res: Response) => {
 	const pageParam = req.query.page as string;
 	const page = pageParam ? parseInt(pageParam) : DEFAULT_PAGE;
 
@@ -22,7 +23,7 @@ router.get('/top-channels', (req, res) => {
 	});
 })
 
-router.get('/top-videos', (req, res) => {
+router.get('/top-videos', (req: Request, res: Response) => {
 	const pageParam = req.query.page as string;
 	const page = pageParam ? parseInt(pageParam) : DEFAULT_PAGE;
 
@@ -35,7 +36,7 @@ router.get('/top-videos', (req, res) => {
 	});
 })
 
-router.get('/channel/:channelId', async (req, res) => {
+router.get('/channel/:channelId', async (req: Request, res: Response) => {
 	const channelId = req.params.channelId
 
 	try {
@@ -48,7 +49,7 @@ router.get('/channel/:channelId', async (req, res) => {
 	}
 })
 
-router.get('/video/:videoId', async (req, res) => {
+router.get('/video/:videoId', async (req: Request, res: Response) => {
 	const videoId = req.params.videoId
 	const video = await VideoRepository.getVideoAsync(videoId);
 
@@ -61,50 +62,44 @@ router.get('/video/:videoId', async (req, res) => {
 	}
 })
 
-router.get('/:youtubeVideoId', async (req, res) => {
+router.get('/:youtubeVideoId', async (req: Request, res: Response) => {
 	res.type('application/json')
-
 	const videoId = req.params.youtubeVideoId
 
 	//TODO: FIX NULL COALLECING OPERATION HERE
-	YoutubeApiProxy.getVideoMetadataAsync(videoId, process.env.GOOGLE_API_KEY || '', async (videoData: any) => {
-		const videoSeconds = getSecondsFromISO8601(videoData.contentDetails.duration)
-		const totalOpportunityCost = videoData.statistics.viewCount * videoSeconds
+	const videoData = await YoutubeApiProxy.getVideoMetadataAsync(videoId, process.env.GOOGLE_API_KEY || '');
+	const videoSeconds = getSecondsFromISO8601(videoData.contentDetails.duration)
+	const totalOpportunityCost = videoData.statistics.viewCount * videoSeconds
 
-		const responseData = {
-			videoMeta: {
-				id: videoData.id,
-				title: videoData.snippet.title,
-				views: videoData.statistics.viewCount,
-				likes: videoData.statistics.likeCount,
-				length: videoSeconds,
-				opportunityCost: totalOpportunityCost,
-				publishDate: videoData.snippet.publishedAt,
-				thumbnails: videoData.snippet.thumbnails
-			},
-			channelMeta: {
-				id: videoData.snippet.channelId,
-				name: videoData.snippet.channelTitle,
-				creationDate: null,
-				thumbnails: null,
-			}
+	const responseData = {
+		videoMeta: {
+			id: videoData.id,
+			title: videoData.snippet.title,
+			views: videoData.statistics.viewCount,
+			likes: videoData.statistics.likeCount,
+			length: videoSeconds,
+			opportunityCost: totalOpportunityCost,
+			publishDate: videoData.snippet.publishedAt,
+			thumbnails: videoData.snippet.thumbnails
+		},
+		channelMeta: {
+			id: videoData.snippet.channelId,
+			name: videoData.snippet.channelTitle,
+			creationDate: null,
+			thumbnails: null,
 		}
+	}
 
-		//TEST & VERIFY CHANNEL OPPORTUNITY COST CALCULATION
-		const existingVideo = await VideoRepository.getVideoAsync(responseData.videoMeta.id);
-		const oppCostDiff = existingVideo ? responseData.videoMeta.opportunityCost - existingVideo.opportunityCost : responseData.videoMeta.opportunityCost;
+	const existingVideo = await VideoRepository.getVideoAsync(responseData.videoMeta.id);
+	const newCost = responseData.videoMeta.opportunityCost
+	const existingCost = existingVideo?.opportunityCost || newCost
+	const oppCostDiff = calculateCostDiff(existingCost, newCost)
 
-		await VideoRepository.upsertVideoAsync(responseData);
-		await ChannelRepository.upsertChannel(responseData, oppCostDiff)
+	await VideoRepository.upsertVideoAsync(responseData);
+	await ChannelRepository.upsertChannel(responseData, oppCostDiff)
 
-		res.status(200)
-		res.send(JSON.stringify(responseData))
-	}, (error: Error) => {
-		res.status(400)
-		res.send(JSON.stringify({
-			message: 'An unknown error occured loading the data'
-		}))
-	})
+	res.status(200)
+	res.send(JSON.stringify(responseData))
 })
 
 export default router

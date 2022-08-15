@@ -2,23 +2,21 @@ import axios from 'axios'
 import logger from '../../logger.js'
 
 class YoutubeApiProxy {
-	static getVideoMetadataAsync(videoId: string, apiKey: string, success: Function, failure: Function) {
+	static async getVideoMetadataAsync(videoId: string, apiKey: string): Promise<any> {
 		const requestUrl = `https://www.googleapis.com/youtube/v3/videos?part=statistics,contentDetails,snippet&id=${videoId}&key=${apiKey}`
 
-		axios.get(requestUrl)
-			.then(function (response) {
-				if (response.data.items && response.data.items.length > 0) {
-					success(response.data.items[0]);
-				} else {
-					const errorMessage = 'Response object was not formatted as expected.';
-					logger.error(errorMessage)
-					failure(errorMessage);
-				}
-			})
-			.catch(function (error) {
-				logger.error(error)
-				failure(error)
-			})
+		try {
+			const response = await axios.get(requestUrl)
+
+			if (response.data.items && response.data.items.length > 0) {
+				return response.data.items[0];
+			}
+
+			throw new Error('Response object was not formatted as expected.');
+		} catch (error: any) {
+			logger.error(error)
+			throw error;
+		}
 	}
 }
 
