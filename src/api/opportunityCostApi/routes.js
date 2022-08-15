@@ -7,12 +7,25 @@ import logger from '../../logger.js'
 
 const router = express.Router()
 
-router.get('/top-videos', (req, res) => {
+router.get('/top-channels', (req, res) => {
 	const pageParam = req.query.page;
-	const page = pageParam ? pageParam : 0;
+	const page = pageParam ? parseInt(pageParam) : 0;
 
 	const pageSizeParam = req.query.pageSize;
-	const pageSize = pageSizeParam ? pageSizeParam : 20;
+	const pageSize = pageSizeParam ? parseInt(pageSizeParam) : 20;
+
+	ChannelRepository.getTopChannelsByOpportunityCost(page, pageSize, (results) => {
+		res.status(200)
+		res.send(JSON.stringify(results))
+	});
+})
+
+router.get('/top-videos', (req, res) => {
+	const pageParam = req.query.page;
+	const page = pageParam ? parseInt(pageParam) : 0;
+
+	const pageSizeParam = req.query.pageSize;
+	const pageSize = pageSizeParam ? parseInt(pageSizeParam) : 20;
 
 	VideoRepository.getTopVideosByOpportunityCost(page, pageSize, (results) => {
 		res.status(200)
@@ -20,12 +33,40 @@ router.get('/top-videos', (req, res) => {
 	});
 })
 
-router.get('/:youtubeVideoId', (req, res) => {
+router.get('/channel/:channelId', async (req, res) => {
+	const channelId = req.params.channelId
+
+	const channel = await ChannelRepository.getChannelAsync(channelId);
+
+	if (channel) {
+		res.status(200)
+		res.send(JSON.stringify(channel))
+	} else {
+		res.status(404)
+		res.send()
+	}
+})
+
+router.get('/video/:videoId', async (req, res) => {
+	const videoId = req.params.videoId
+	
+	const video = await VideoRepository.getVideoAsync(videoId);
+
+	if (video) {
+		res.status(200)
+		res.send(JSON.stringify(video))
+	} else {
+		res.status(404)
+		res.send()
+	}
+})
+
+router.get('/:youtubeVideoId', async (req, res) => {
 	res.type('application/json')
 
 	const videoId = req.params.youtubeVideoId
 
-	YoutubeApiProxy.getMetadata(videoId, process.env.GOOGLE_API_KEY, (videoData) => {
+	YoutubeApiProxy.getMetadata(videoId, process.env.GOOGLE_API_KEY, async (videoData) => {
 		const videoSeconds = ParsingHelpers.getSecondsFromVideoDuration(videoData.contentDetails.duration)
 		const totalOpportunityCost = videoData.statistics.viewCount * videoSeconds
 
@@ -48,12 +89,11 @@ router.get('/:youtubeVideoId', (req, res) => {
 			}
 		}
 
-		ChannelRepository.upsertChannel(responseData).then(() => {
-			VideoRepository.upsertVideo(responseData).then(() => {
-				res.status(200)
-				res.send(JSON.stringify(responseData))
-			});
-		});
+		await ChannelRepository.upsertChannel(responseData.channelMeta)
+		await ChannelRepository.addOrUpdateVideoOnChannel(responseData.channelMeta.id, responseData.videoMeta)
+
+		res.status(200)
+		res.send(JSON.stringify(responseData))
 	}, (error) => {
 		res.status(400)
 		res.send(JSON.stringify({

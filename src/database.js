@@ -15,6 +15,9 @@ class Database {
     await this.client.connect();
     logger.info('Mongo DB Connection Successful');
     this.db = this.client.db();
+		await this.db.collection("channels").createIndex( { opportunityCost: -1 } )
+		await this.db.collection("channels").createIndex( { 'videos.opportunityCost': 1 } )
+		await this.db.collection("channels").createIndex( { 'videos.id': 1 } )
   }
 }
 

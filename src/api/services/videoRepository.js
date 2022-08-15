@@ -1,18 +1,14 @@
 import mongo from "../../database.js";
 import logger from "../../logger.js";
 
-class VideoRepo {
-	collectionName = "videos";
+class VideoRepository {
+	static collectionName = "videos";
 
-	constructor() {
-
+	async getVideoAsync(videoId) {
+		return await mongo.db.collection(VideoRepo.collectionName).findOne({ _id: videoId });
 	}
 
-	getVideo(videoId) {
-		mongo.db.collection(this.collectionName).find({ videoId: videoId })
-	}
-
-	async upsertVideo(data) {
+	async upsertVideoAsync(data) {
 		const query = { videoId: data.videoMeta.id };
 		const update = {
 			$set: { 
@@ -31,19 +27,28 @@ class VideoRepo {
 			}
 		};
 
-		await mongo.db.collection(this.collectionName).updateOne(query, update, { upsert: true });
+		await mongo.db.collection(VideoRepo.collectionName).updateOne(query, update, { upsert: true });
 	}
 
 	getTopVideosByOpportunityCost(page, pageSize, success) {
-		mongo.db.collection(this.collectionName).find().skip(page * pageSize).limit(pageSize).sort({ opportunityCost: -1 }).toArray(function(err, result) {
-			if (err) 
+		mongo.db.collection(VideoRepo.collectionName).find().skip(page * pageSize).limit(pageSize).sort({ opportunityCost: -1 }).toArray((err, result) => {			
+			if (err) {
+				logger.error(err);
 				throw err;
+			}
 				
 			success(result);
 		  });
 	}
-}
 
-const VideoRepository = new VideoRepo();
+	getTotalOpportunityCostForChannelVideos(channelId, success) {
+		return mongo.db.collection(VideoRepo.collectionName).aggregate([
+			{$match:{ channelId: channelId }},
+			{ $group:{ _id: null, TotalSum: { $sum: "$opportunityCost" }} }
+		]).toArray((error, results) => {
+			success(results);
+		});
+	}
+}
 
 export default VideoRepository;

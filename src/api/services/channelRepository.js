@@ -1,63 +1,71 @@
 import mongo from "../../database.js";
 import logger from "../../logger.js";
 
-class ChannelRepo {
-	collectionName = "channels";
+class ChannelRepository {
+	static collectionName = "channels";
 
-	constructor() {
-
+	static async getChannelAsync(channelId) {
+		return await mongo.db.collection(ChannelRepository.collectionName).findOne({ _id: channelId });
 	}
 
-	getChannel(channelId) {
-		mongo.db.collection(this.collectionName).find({ channelId: channelId })
-	}
-
-	//INDEX BY CHANNEL ID & CHANNEL OC
-	//INDEX BY VIDEO ID & VIDEO OC
-
-	async upsertChannel(data) {
-		const query = { channelId: data.channelMeta.id };
-		const update = {
-			$set: { 
-				name: data.channelMeta.name,
-				updatedOn: new Date()
+	static async upsertChannel(channelMeta) {
+		return await mongo.db.collection(ChannelRepository.collectionName).updateOne({ 
+			_id: channelMeta.id 
+		}, {
+			$set: {
+				_id: channelMeta.id,
+				name: channelMeta.name,
+				updatedOn: new Date(),
 			},
 			$setOnInsert: {
-				createdOn: new Date()
-			},
-			$max: {
-				opportunityCost: 0,
-			},
-			$addToSet: {
-				videos: data.videoMeta.id
+				createdOn: new Date(),
+				opportunityCost: 0
 			}
-		};
-
-		await mongo.db.collection(this.collectionName).updateOne(query, update, { upsert: true });
-		//GET RESULTS BACK FOR IF NEW CHANNEL VS NOT
-
-		//INSERT VIDEO SAFELY HERE
+		}, { 
+			upsert: true 
+		});
 	}
 
-	upsertVideoOnChannel(videoData) {
-		//If video is already on channel CALCULATE DIFFERENCE OF NEW OPPORTUNITY COST
-		var updatedOpportunityCost = 0; //MAKE THIS DIFFERENCE
+	static async addOrUpdateVideoOnChannel(channelId, videoMeta) {
+		const channelVideoQuery = { 
+			'_id': channelId,
+			'videos.id': videoMeta.id
+		}
+		const channel = await mongo.db.collection(ChannelRepository.collectionName).findOne(channelVideoQuery);
 
-		//If video is not already on channel ADD NEW OPPORTUNITY COST TO CHANNEL
-		//MAKE updatedOpportunityCost OPPORTUNITY COST
+		if (channel) {
+			const video = channel.videos.find(video => video.id === videoMeta.id);
 
-		//Update Channel Opportunity Cost to be EXISTING + updatedOpportunityCost
+			await mongo.db.collection(ChannelRepository.collectionName).updateOne(channelVideoQuery, {
+				$inc: { opportunityCost: videoMeta.opportunityCost - video.opportunityCost },
+				$set: {
+					'videos.$.opportunityCost': videoMeta.opportunityCost,
+					'videos.$.likes': videoMeta.opportunityCost,
+					'videos.$.views': videoMeta.views,
+					'videos.$.updatedOn': new Date()
+				}
+			});
+		} else {
+			await mongo.db.collection(ChannelRepository.collectionName).updateOne({ 
+				_id: channelId
+			}, {
+				$inc: { opportunityCost: videoMeta.opportunityCost },
+				$addToSet: { videos: videoMeta }
+			});
+		}
 	}
 
-	getTopChannelsByOpportunityCost(page) {
-
-	}
-
-	getTopVideosByOpportunityCost(page) {
-		
+	static getTopChannelsByOpportunityCost(page, pageSize, success) {
+		const projection = { _id: 0, opportunityCost: 1, name: 1, videos: 0, createdOn: 0 }
+		mongo.db.collection(ChannelRepository.collectionName).find().skip(page * pageSize).limit(pageSize).sort({ opportunityCost: -1 }).toArray((err, result) => {			
+			if (err) {
+				logger.error(err);
+				throw err;
+			}
+				
+			success(result);
+		  });
 	}
 }
-
-const ChannelRepository = new ChannelRepo();
 
 export default ChannelRepository;
