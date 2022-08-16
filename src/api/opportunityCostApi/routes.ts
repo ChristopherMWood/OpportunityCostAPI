@@ -1,14 +1,32 @@
-import express, { Request, Response } from 'express'
+import express, { NextFunction, Request, response, Response } from 'express'
 import { YoutubeApiProxy } from '../../domain/proxies/youtubeApiProxy.js'
 import { getSecondsFromISO8601 } from '../../domain/parsers/timeFormatParsers.js'
 import ChannelRepository from '../../domain/repositories/channelRepository.js'
-import VideoRepository from '../../domain/repositories/videoRepository.js' 
+import VideoRepository from '../../domain/repositories/videoRepository.js'
+import ServerOverviewRepository from '../../domain/repositories/serverOverviewRepository.js'
 import { calculateCostDiff } from '../../domain/opportunityCostCalculations.js'
 import logger from '../../logger.js'
  
 const router = express.Router()
 const DEFAULT_PAGE = 0
 const DEFAULT_PAGE_SIZE = 20
+
+router.use(function(req: Request, res: Response, next: NextFunction) {
+	res.type('application/json')
+    next();
+});
+
+router.get('/overview', async (req: Request, res: Response) => {
+	try {
+		const overview = await ServerOverviewRepository.getSiteSummary();
+		res.status(200)
+		res.send(JSON.stringify(overview))
+	} catch (error) {
+		logger.error(error)
+		response.status(500)
+		res.send()
+	}
+})
 
 router.get('/top-channels', (req: Request, res: Response) => {
 	const pageParam = req.query.page as string;
@@ -41,30 +59,43 @@ router.get('/channel/:channelId', async (req: Request, res: Response) => {
 
 	try {
 		const channel = await ChannelRepository.getChannelAsync(channelId);
-		res.status(200)
-		res.send(JSON.stringify(channel))
+
+		if (channel) {
+			res.status(200)
+			res.send(JSON.stringify(channel))
+		} else {
+			res.status(404)
+			res.send()
+		}
 	} catch (error) {
-		res.status(404)
+		logger.error(error);
+		res.status(500)
 		res.send()
 	}
 })
 
 router.get('/video/:videoId', async (req: Request, res: Response) => {
 	const videoId = req.params.videoId
-	const video = await VideoRepository.getVideoAsync(videoId);
 
-	if (video) {
-		res.status(200)
-		res.send(JSON.stringify(video))
-	} else {
-		res.status(404)
+	try {
+		const video = await VideoRepository.getVideoAsync(videoId);
+
+		if (video) {
+			res.status(200)
+			res.send(JSON.stringify(video))
+		} else {
+			res.status(404)
+			res.send()
+		}
+	} catch (error) {
+		logger.error(error);
+		res.status(500)
 		res.send()
 	}
 })
 
-router.get('/:youtubeVideoId', async (req: Request, res: Response) => {
-	res.type('application/json')
-	const videoId = req.params.youtubeVideoId
+router.get('/:videoId', async (req: Request, res: Response) => {
+	const videoId = req.params.videoId
 
 	//TODO: FIX NULL COALLECING OPERATION HERE
 	const videoData = await YoutubeApiProxy.getVideoMetadataAsync(videoId, process.env.GOOGLE_API_KEY || '');
@@ -92,11 +123,12 @@ router.get('/:youtubeVideoId', async (req: Request, res: Response) => {
 
 	const existingVideo = await VideoRepository.getVideoAsync(responseData.videoMeta.id);
 	const newCost = responseData.videoMeta.opportunityCost
-	const existingCost = existingVideo?.opportunityCost || newCost
+	const existingCost = existingVideo?.opportunityCost || 0
 	const oppCostDiff = calculateCostDiff(existingCost, newCost)
 
 	await VideoRepository.upsertVideoAsync(responseData);
 	await ChannelRepository.upsertChannel(responseData, oppCostDiff)
+	await ServerOverviewRepository.updateSiteSummary(oppCostDiff)
 
 	res.status(200)
 	res.send(JSON.stringify(responseData))

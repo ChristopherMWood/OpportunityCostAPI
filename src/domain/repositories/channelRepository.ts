@@ -8,12 +8,7 @@ class ChannelRepository {
 		return await mongo.db?.collection(ChannelRepository.collectionName).findOne({ _id: channelId });
 	}
 
-	static async upsertChannel(data: any, opportunityCostIncrement = 0) {
-		await mongo.db?.collection("summaries").updateOne(
-			{ _id: 0 }, 
-			{ $inc: { allChannelsOpportunityCost: opportunityCostIncrement } },
-			{ upsert: true });
-		
+	static async upsertChannel(data: any, opportunityCostIncrement = 0) {	
 		return await mongo.db?.collection(ChannelRepository.collectionName).updateOne({ 
 			_id: data.channelMeta.id 
 		}, {

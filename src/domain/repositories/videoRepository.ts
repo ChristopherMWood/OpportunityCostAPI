@@ -9,7 +9,7 @@ class VideoRepository {
 	}
 
 	static async upsertVideoAsync(data: any) {
-		const query = { videoId: data.videoMeta.id };
+		const query = { _id: data.videoMeta.id };
 		const update = {
 			$set: { 
 				title: data.videoMeta.title,
