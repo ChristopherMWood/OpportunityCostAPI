@@ -38,13 +38,12 @@ const apiRouteRequestLogging = (req: Request, _res: Response, next: NextFunction
 
 app.use('/api', apiRouteRequestLogging, apiRoutes)
 
-app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
-	logger.error(err)
-
+app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
 	if (res.headersSent) {
 		return next(err)
 	}
 
+	logger.error('Unhandled Exception Caught: ' + err.message)
 	res.status(500).send('An unhandled error occured')
 })
 
