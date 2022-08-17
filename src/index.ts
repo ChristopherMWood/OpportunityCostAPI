@@ -21,6 +21,11 @@ const app = express()
 app.use(cors())
 app.use(bodyParser.json())
 
+app.use(function(req: Request, res: Response, next: NextFunction) {
+	res.type('application/json')
+    next();
+});
+
 app.use(responseTime(function (req: Request, _res: Response, time: Number) {
 	logger.info(`[PERFORMANCE - ${time}ms: ${req.method + req.url}`)
 }))

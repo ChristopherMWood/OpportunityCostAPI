@@ -1,4 +1,4 @@
-import express, { NextFunction, Request, response, Response } from 'express'
+import express, { Request, response, Response } from 'express'
 import { YoutubeApiProxy } from '../../domain/proxies/youtubeApiProxy.js'
 import { getSecondsFromISO8601 } from '../../domain/parsers/timeFormatParsers.js'
 import ChannelRepository from '../../domain/repositories/channelRepository.js'
@@ -10,11 +10,6 @@ import logger from '../../logger.js'
 const router = express.Router()
 const DEFAULT_PAGE = 0
 const DEFAULT_PAGE_SIZE = 20
-
-router.use(function(req: Request, res: Response, next: NextFunction) {
-	res.type('application/json')
-    next();
-});
 
 router.get('/overview', async (req: Request, res: Response) => {
 	try {
