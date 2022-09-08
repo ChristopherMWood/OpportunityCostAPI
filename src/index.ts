@@ -1,9 +1,11 @@
 import dotenv from 'dotenv'
 dotenv.config()
 
-import express, { Express, NextFunction, Request, Response, Router } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import cors from 'cors'
 import bodyParser from 'body-parser'
+import logResponseTime from './middleware/responseTimeLogger.js'
+import errorLogger from './middleware/errorLogger.js'
 import responseTime from 'response-time'
 import apiRoutes from './api/routes.js'
 import mongo from './database.js';
@@ -26,9 +28,7 @@ app.use(function(req: Request, res: Response, next: NextFunction) {
     next();
 });
 
-app.use(responseTime(function (req: Request, _res: Response, time: Number) {
-	logger.info(`[PERFORMANCE - ${time}ms: ${req.method + req.url}`)
-}))
+app.use(responseTime(logResponseTime));
 
 const apiRouteRequestLogging = (req: Request, _res: Response, next: NextFunction) => {
 	const requestedEndpoint = req.protocol + '://' + req.get('Host') + req.url
@@ -38,14 +38,15 @@ const apiRouteRequestLogging = (req: Request, _res: Response, next: NextFunction
 
 app.use('/api', apiRouteRequestLogging, apiRoutes)
 
-app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
-	if (res.headersSent) {
-		return next(err)
-	}
+app.use(errorLogger);
+// app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
+// 	if (res.headersSent) {
+// 		return next(err)
+// 	}
 
-	logger.error('Unhandled Exception Caught: ' + err.message)
-	res.status(500).send('An unhandled error occured')
-})
+// 	logger.error('Unhandled Exception Caught: ' + err.message)
+// 	res.status(500).send('An unhandled error occured')
+// })
 
 const server = app.listen(process.env.SERVER_PORT, () => {
 	logger.info(`Server running on port ${process.env.SERVER_PORT}...`)
