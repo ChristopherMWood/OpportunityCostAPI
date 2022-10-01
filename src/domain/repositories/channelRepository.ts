@@ -31,6 +31,18 @@ class ChannelRepository {
 		});
 	}
 
+	static async getChannelRank(videoId: string) {
+		const channelRecord = await ChannelRepository.getChannelAsync(videoId);
+		let indexPosition = -100;
+
+		if (channelRecord) {
+			indexPosition = await mongo.db?.collection(ChannelRepository.collectionName).countDocuments({ opportunityCost : { $gt : channelRecord.opportunityCost } }) ?? -1;  
+			indexPosition += 1;
+		}
+
+		return indexPosition;
+	}
+
 	static async addOrUpdateVideoOnChannel(channelId: string, videoMeta: any) {
 		const channelVideoQuery = { 
 			'_id': channelId,

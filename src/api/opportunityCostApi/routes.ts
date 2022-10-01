@@ -53,9 +53,12 @@ router.get('/channel/:channelId', async (req: Request, res: Response) => {
 	const channelId = req.params.channelId
 
 	try {
-		const channel = await ChannelRepository.getChannelAsync(channelId);
+		let channel = await ChannelRepository.getChannelAsync(channelId);
 
 		if (channel) {
+			const rank = await ChannelRepository.getChannelRank(channelId);
+			channel.rank = rank;
+			
 			res.status(200)
 			res.send(JSON.stringify(channel))
 		} else {
@@ -91,8 +94,6 @@ router.get('/video/:videoId', async (req: Request, res: Response) => {
 
 router.get('/:videoId', async (req: Request, res: Response) => {
 	const videoId = req.params.videoId
-
-	//TODO: FIX NULL COALLECING OPERATION HERE
 	const videoData = await YoutubeApiProxy.getVideoMetadataAsync(videoId, process.env.GOOGLE_API_KEY || '');
 	const videoSeconds = getSecondsFromISO8601(videoData.contentDetails.duration)
 	const totalOpportunityCost = videoData.statistics.viewCount * videoSeconds
@@ -105,6 +106,7 @@ router.get('/:videoId', async (req: Request, res: Response) => {
 			likes: videoData.statistics.likeCount,
 			length: videoSeconds,
 			opportunityCost: totalOpportunityCost,
+			rank: 0,
 			publishDate: videoData.snippet.publishedAt,
 			thumbnails: videoData.snippet.thumbnails
 		},
@@ -124,6 +126,10 @@ router.get('/:videoId', async (req: Request, res: Response) => {
 	await VideoRepository.upsertVideoAsync(responseData);
 	await ChannelRepository.upsertChannel(responseData, oppCostDiff)
 	await ServerOverviewRepository.updateSiteSummary(oppCostDiff)
+
+	const leaderboardRank = await VideoRepository.getVideoRank(videoData.id);
+	responseData.videoMeta.rank = leaderboardRank;
+	
 
 	res.status(200)
 	res.send(JSON.stringify(responseData))

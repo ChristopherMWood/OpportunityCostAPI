@@ -30,6 +30,18 @@ class VideoRepository {
 		await mongo.db?.collection(VideoRepository.collectionName).updateOne(query, update, { upsert: true });
 	}
 
+	static async getVideoRank(videoId: string) {
+		const videoRecord = await VideoRepository.getVideoAsync(videoId);
+		let indexPosition = -100;
+
+		if (videoRecord) {
+			indexPosition = await mongo.db?.collection(VideoRepository.collectionName).countDocuments({ opportunityCost : { $gt : videoRecord.opportunityCost } }) ?? -1;  
+			indexPosition += 1;
+		}
+
+		return indexPosition;
+	}
+
 	static async getTopVideosByOpportunityCost(page: number, pageSize: number, success: Function) {
 		mongo.db?.collection(VideoRepository.collectionName).find().skip(page * pageSize).limit(pageSize).sort({ opportunityCost: -1 }).toArray((err, result) => {			
 			if (err) {
