@@ -2,6 +2,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 import express, { NextFunction, Request, Response } from 'express';
+import { collectDefaultMetrics, register } from 'prom-client';
 import cors from 'cors'
 import bodyParser from 'body-parser'
 import logResponseTime from './middleware/responseTimeLogger.js'
@@ -11,12 +12,12 @@ import apiRoutes from './api/routes.js'
 import mongo from './database.js';
 import logger from './logger.js'
 
-logger.info(`Server running in: ${process.env.NODE_ENV} mode`)
-
 if (!process.env.GOOGLE_API_KEY) {
 	throw new Error('ERROR: GOOGLE_API_KEY environment variable has not been correctly set!')
 }
 
+logger.info(`Server booting in: ${process.env.NODE_ENV} mode`)
+collectDefaultMetrics();
 mongo.init();
 
 const app = express()
@@ -47,6 +48,15 @@ app.use(errorLogger);
 // 	logger.error('Unhandled Exception Caught: ' + err.message)
 // 	res.status(500).send('An unhandled error occured')
 // })
+
+app.get('/metrics', async (_req, res) => {
+	try {
+	  res.set('Content-Type', register.contentType);
+	  res.end(await register.metrics());
+	} catch (err) {
+	  res.status(500).end(err);
+	}
+  });
 
 const server = app.listen(process.env.SERVER_PORT, () => {
 	logger.info(`Server running on port ${process.env.SERVER_PORT}...`)
