@@ -38,9 +38,3 @@ services:
       - "27017:27017"
     env_file:
       - .env
-  prometheus:
-    image: prom/prometheus:main
-    expose:
-      - "9090"
-    ports: 
-      - "9090:9090"
