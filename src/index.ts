@@ -3,6 +3,7 @@ dotenv.config()
 
 import express, { NextFunction, Request, Response } from 'express';
 import { collectDefaultMetrics, register } from 'prom-client';
+import promBundle from 'express-prom-bundle';
 import cors from 'cors'
 import bodyParser from 'body-parser'
 import logResponseTime from './middleware/responseTimeLogger.js'
@@ -23,6 +24,13 @@ mongo.init();
 const app = express()
 app.use(cors())
 app.use(bodyParser.json())
+
+const metricsMiddleware = promBundle({
+	includeMethod: true,
+	includePath: true,
+	includeStatusCode: true,
+});
+app.use(metricsMiddleware);
 
 app.use(function(req: Request, res: Response, next: NextFunction) {
 	res.type('application/json')
