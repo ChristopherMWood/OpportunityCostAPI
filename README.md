@@ -37,6 +37,7 @@ Environment (env) options: dev || prod
 
 ## API Endpoint(s)
 
+-- NEEDS TO BE UPDATED (Currently out of date) --
 Backend API for <https://www.opportunitycost.life> that takes a YouTube video URL and calculates how much time has been spent by all viewers combined to watch that video. Started as a joke and turned into this in the end.
 
 ### **GET** - YouTube Video Opportunity Cost
