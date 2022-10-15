@@ -11,7 +11,7 @@ router.use('/opportunityCost', opportunityCostApiRoutes)
 router.get('/health-ping', (_req: Request, res: Response) => {
 	res.status(200)
 	res.send(JSON.stringify({
-		otc: "the rooster is healthy on full nights"
+		otc: "the rooster is healthy on full nights orange"
 	}))
 })
 
